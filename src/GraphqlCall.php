@@ -29,6 +29,7 @@ trait GraphqlCall
         $builder = new Builder($endpoint);
 
         $query = '{"query": "' . $builder->build_query($type, $name, $opts) . '"}';
+
         $query = str_replace("\n", "", $query);
 
         $headers = array_merge([
@@ -38,6 +39,8 @@ trait GraphqlCall
             'access_token' => '111',
         ], $headers);
 
-        return $this->call('POST', $endpoint, [], [], [], $this->transformHeadersToServerVars($headers), $query);
+        $response = $this->call('POST', $endpoint, [], [], [], $this->transformHeadersToServerVars($headers), $query);
+
+        return $response;
     }
 }

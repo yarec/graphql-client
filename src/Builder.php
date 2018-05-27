@@ -2,21 +2,43 @@
 
 namespace Gql;
 
+function _build_space($count){
+    $space = '';
+    foreach (range(1, $count) as $item) {
+        $space .= '    ';
+    }
+    return $space;
+}
+
+function _build_resp($resps, $layer, $max_depth) {
+    if(is_string($resps)){
+        return $resps;
+    }
+
+    if($layer > $max_depth) return 'exit';
+
+    $data = '';
+    foreach ($resps as $k => $resp) {
+        #$data .= ' ';
+        if(is_array($resp)){
+            $data .=  "$k" . _build_resp($resp, $layer++, $max_depth);
+        }else{
+            $data .= _build_space($layer+1) . $resp;
+        }
+    }
+
+    return "{\n" . _build_space($layer+1) . $data . "\n". _build_space($layer-2) . "}";
+}
+
 class Builder
 {
     /**
-
-       $query_name,
-       $root_type,
-       $opts : [
-        'args' => [],
-        'vars' => [],
-        'resp' => [],
-        'paginate' => [
-            'page'=>1,
-            'per_page' => 10,
-        ],
-       ]
+     *  $root_type,    
+     *  $query_name,
+     *  $opts : [
+     *   'args' => [],
+     *   'resp' => [],
+     *  ]
      */
     public function build_query($type, $name, $opts){
         $params = "";
@@ -35,29 +57,34 @@ class Builder
             $args = '('.$args_str.')';
         }
 
-        $resp = '';
         if(isset($opts['resp'])){
-            if(is_array($opts['resp'])){
-                $resp = "{\n        ". join($opts['resp'], ' ') . "\n    }";
-            }
+            $resp = $this->build_resp($opts['resp'], isset($opts['paginate']) ? $opts['paginate'] : null);
         }else{
-            $resp = '{id}';
+            $resp = '';
         }
 
-        $paginate = isset($opts['paginate']) ? $opts['paginate'] : [];
+        return <<<QUERY
+    $type $name $params {
+        $name $args
+        $resp
+    }
+QUERY;
+    }
+
+    public function build_resp($_resp, $paginate=null){
+        $resp = _build_resp($_resp, 1, 3);
+
         $page = 1;
         if($paginate){
             $paginate_resp = "    pagination {total last_page from to per_page current_page}\n";
-            $resp = "{\n $paginate_resp     data".$resp."\n}";
+            $resp = "{\n $paginate_resp     data".$resp."}";
             if(isset($paginate['page'])){
             }
         }
 
-        return <<<QUERY
-            $type $name $params {
-                $name $args
-                $resp
-            }
-QUERY;
+        return $resp;
     }
+
+
+
 }

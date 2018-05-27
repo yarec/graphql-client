@@ -4,7 +4,9 @@
     "version": "0.0.1",
     "type": "library",
     "minimum-stability": "dev",
-    "require": {},
+    "require": {
+        "guzzlehttp/guzzle": "~6.0"
+    },
     "autoload": {
         "psr-4": {
             "Gql\\": "src/"
