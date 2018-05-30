@@ -33,7 +33,7 @@ function _build_resp($resps, $layer, $max_depth) {
 class Builder
 {
     /**
-     *  $root_type,    
+     *  $root_type,
      *  $query_name,
      *  $opts : [
      *   'args' => [],

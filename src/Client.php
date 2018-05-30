@@ -7,6 +7,7 @@ use Psr\Http\Message\ResponseInterface;
 class Client
 {
     private $httpClient;
+    protected $response;
 
     public function __construct(string $endpoint='/graphql', array $guzzleOptions = []) {
 
@@ -23,15 +24,37 @@ class Client
         return $this->exec($name, $opts, 'mutation', $endpoint);
     }
 
+    function schema(array $opts, $type='types'){
+        return $this->query('__schema', [
+            'params' => $opts['params'],
+            'resp' => [
+                $type => ['name']
+            ]
+        ]);
+    }
+
+    function type(string $name, array $opts){
+        return $this->query('__type', [
+            'args' => ['name' => $name],
+            'params' => $opts['params'],
+            'resp' => $opts['resp'],
+        ]);
+    }
+
     public function exec(string $name, $opts, string $type='query', string $endpoint=null){
+        $this->response = $this->call_request($name, $opts, $type, $endpoint);
+        return $this->json();
+    }
+
+    public function call_request(string $name, $opts, string $type='query', string $endpoint=null){
         $builder = new Builder();
 
         $query = $builder->build_query($type, $name, $opts);
+        $query = str_replace("\n", "", $query);
 
         $params = isset($opts['params']) ? $opts['params'] : [];
 
-        $response = $this->request($query, $params, $endpoint);
-        return $response;
+        return $this->request($query, $params, $endpoint);
     }
 
     public function request(string $query, array $params, string $endpoint=null)
@@ -49,14 +72,21 @@ class Client
             throw new \RuntimeException('Network Error.'.$e->getMessage(), 0, $e);
         }
 
-        $json = $this->toJson($response);
-        return $json;
+        return $response;
+    }
+
+    public function json(){
+        return $this->toJson($this->response);
+    }
+
+    public function response(){
+        return $this->response;
     }
 
     private function toJson(ResponseInterface $httpResponse)
     {
         $body = $httpResponse->getBody();
-        
+
         $json = $this->strToJson($body);
 
         return $json;
@@ -72,4 +102,28 @@ class Client
         }
         return $json_decode;
     }
+
+
+    /*
+    public function assertGqlJson(array $data, $strict = false)
+    {
+        PHPUnit::assertArraySubset(
+            $data, $this->decodeResponseJson(), $strict, $this->assertJsonMessage($data)
+        );
+
+        return $this;
+    }
+
+    protected function assertGqlJsonMessage(array $data)
+    {
+        $expected = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+        $actual = json_encode($this->decodeResponseJson(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+        return 'Unable to find JSON: '.PHP_EOL.PHP_EOL.
+                                      "[{$expected}]".PHP_EOL.PHP_EOL.
+                                      'within response JSON:'.PHP_EOL.PHP_EOL.
+                                      "[{$actual}].".PHP_EOL.PHP_EOL;
+    }
+    */
 }
