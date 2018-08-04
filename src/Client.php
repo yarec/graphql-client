@@ -51,6 +51,7 @@ class Client
 
         $query = $builder->build_query($type, $name, $opts);
         $query = str_replace("\n", "", $query);
+        $query = str_replace("\\", "", $query);
 
         $params = isset($opts['params']) ? $opts['params'] : [];
 

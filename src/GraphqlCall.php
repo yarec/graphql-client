@@ -4,6 +4,7 @@ namespace Gql;
 
 trait GraphqlCall
 {
+    /*
     public function query($name, $opts, array $headers = []) {
         return $this->do_query('query', $name, $opts, $headers);
     }
@@ -31,6 +32,7 @@ trait GraphqlCall
         $query = '{"query": "' . $builder->build_query($type, $name, $opts) . '"}';
 
         $query = str_replace("\n", "", $query);
+        $query = str_replace("\\", "", $query);
 
         $headers = array_merge([
             'CONTENT_LENGTH' => mb_strlen($query, '8bit'),
@@ -43,4 +45,5 @@ trait GraphqlCall
 
         return $response;
     }
+    */
 }
