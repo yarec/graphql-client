@@ -19,7 +19,7 @@ function _build_resp($resps, $layer, $max_depth) {
 
     $data = '';
     foreach ($resps as $k => $resp) {
-        #$data .= ' ';
+        $data .= ' ';
         if(is_array($resp)){
             $data .=  "$k" . _build_resp($resp, $layer++, $max_depth);
         }else{
