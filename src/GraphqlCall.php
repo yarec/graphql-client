@@ -4,7 +4,8 @@ namespace Gql;
 
 trait GraphqlCall
 {
-    /*
+    protected $gqlEndpoint = '/graphql';
+
     public function query($name, $opts, array $headers = []) {
         return $this->do_query('query', $name, $opts, $headers);
     }
@@ -15,10 +16,11 @@ trait GraphqlCall
 
     public function do_query($type, $name, $opts, array $headers = [])
     {
-        $endpoint = '/graphql';
-        if(isset($opts['query_params'])){
+        $endpoint = $this->gqlEndpoint;
+
+        if(isset($opts['params'])){
             $qs = '?';
-            foreach($opts['query_params'] as $k=>$v){
+            foreach($opts['params'] as $k=>$v){
                 if($qs!='?'){
                     $qs.='&';
                 }
@@ -27,23 +29,15 @@ trait GraphqlCall
             $endpoint .= $qs;
         }
 
-        $builder = new Builder($endpoint);
-
-        $query = '{"query": "' . $builder->build_query($type, $name, $opts) . '"}';
-
+        $builder = new Builder();
+        $query = $builder->build_query($type, $name, $opts);
         $query = str_replace("\n", "", $query);
         $query = str_replace("\\", "", $query);
 
-        $headers = array_merge([
-            'CONTENT_LENGTH' => mb_strlen($query, '8bit'),
-            'CONTENT_TYPE' => 'application/json',
-            'Accept' => 'application/json',
-            'access_token' => '111',
-        ], $headers);
+        $query = ['query'=> $query];
 
-        $response = $this->call('POST', $endpoint, [], [], [], $this->transformHeadersToServerVars($headers), $query);
+        $response = $this->post($endpoint, $query);
 
         return $response;
     }
-    */
 }

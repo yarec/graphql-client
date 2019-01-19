@@ -1,9 +1,8 @@
 {
     "name": "yarec/graphql-client",
     "description": "graphql",
-    "version": "0.0.1",
+    "version": "1.0.1",
     "type": "library",
-    "minimum-stability": "dev",
     "require": {
         "guzzlehttp/guzzle": "~6.0"
     },
